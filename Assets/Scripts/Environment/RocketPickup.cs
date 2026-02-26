@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class RocketPickup : MonoBehaviour
 {
+
+    public GameObject firstCheckpoint;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -21,6 +23,10 @@ public class RocketPickup : MonoBehaviour
         {
             Player p = other.gameObject.GetComponent<Player>();
             p.rocketsEquipped = true;
+            if (firstCheckpoint != null)
+            {
+                firstCheckpoint.SetActive(true);
+            }
         }
     }
 }

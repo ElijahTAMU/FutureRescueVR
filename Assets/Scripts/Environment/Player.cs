@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Gravity;
@@ -15,12 +16,15 @@ public class Player : MonoBehaviour
     public CharacterController characterController;
     public GravityProvider gravityProvider;
 
-    public float speed = 0.02f;
+    public Rigidbody rb;
+
+    public float speed = 0.05f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        triggerAction.action.Enable();
+        triggerAction.action.performed += LeftThrust;
     }
 
     // Update is called once per frame
@@ -52,7 +56,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (rocketsEquipped)
+        if (rocketsEquipped && leftRocket.isThrust)
         {
             MoveThrust();
         }
@@ -60,35 +64,45 @@ public class Player : MonoBehaviour
 
     public void LeftThrust(InputAction.CallbackContext context)
     {
+        Debug.Log("TRIGGERED");
+
         if (rocketsEquipped && context.action.triggered)
         {
-            Debug.Log("Left Rocket On");
-            leftRocket.isThrust = true;
-        }
-
-        if (!context.action.triggered)
-        {
-            Debug.Log("Left Rocket OFF");
-            leftRocket.isThrust = false;
+            if (!leftRocket.isThrust)
+            {
+                gravityProvider.useGravity = false;
+                Debug.Log("Left Rocket On");
+                leftRocket.isThrust = true;
+            }
+            else
+            {
+                gravityProvider.useGravity = true;
+                Debug.Log("Left Rocket OFF");
+                leftRocket.isThrust = false;
+            }
         }
 
     }
 
+    public void UnequipRockets()
+    {
+        rocketsEquipped = false;
+        gravityProvider.useGravity = true;
+    }
+
     public void MoveThrust()
     {
-        gravityProvider.useGravity = false;
-        Vector3 leftDirection = leftRocket.rocket.transform.forward;
-        Vector3 rightDirection = rightRocket.rocket.transform.forward;
-
-        leftDirection = leftDirection.normalized;
-        rightDirection = rightDirection.normalized;
+        Vector3 leftDirection = leftRocket.hand.transform.forward;
+        Vector3 rightDirection = rightRocket.hand.transform.forward;
 
         Vector3 combined = leftDirection + rightDirection;
+
+        combined = combined.normalized;
 
         //characterController.SimpleMove(combined * speed);
         Debug.Log(combined);
         combined = new Vector3(combined.x, combined.y, combined.z);
-        transform.Translate(combined * speed);
+        transform.Translate(combined * speed, Space.World);
     }
 }
 
