@@ -3,7 +3,8 @@ using UnityEngine;
 public class RocketPickup : MonoBehaviour
 {
 
-    public GameObject firstCheckpoint;
+    public GameObject[] firstCheckpoints;
+    public Timer NavigationTimer;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -23,10 +24,13 @@ public class RocketPickup : MonoBehaviour
         {
             Player p = other.gameObject.GetComponent<Player>();
             p.rocketsEquipped = true;
-            if (firstCheckpoint != null)
+            //if (firstCheckpoint != null)
+            foreach(GameObject g in firstCheckpoints)
             {
-                firstCheckpoint.SetActive(true);
+                g.SetActive(true);
             }
+
+            NavigationTimer.StartTimer();
         }
     }
 }

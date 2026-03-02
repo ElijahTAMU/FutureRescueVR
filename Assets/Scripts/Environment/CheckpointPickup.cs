@@ -24,7 +24,7 @@ public class CheckpointPickup : MonoBehaviour
         }
         else
         {
-            other.GetComponent<Player>().UnequipRockets();
+            //other.GetComponent<Player>().UnequipRockets();
         }
         gameObject.SetActive(false);
     }
