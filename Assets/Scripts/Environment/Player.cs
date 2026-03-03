@@ -18,11 +18,17 @@ public class Player : MonoBehaviour
 
     public Rigidbody rb;
 
-    public float speed = 0.01f;
+    public float speed = 0.06f;
+
+    public GameObject arrow;
+
+    public bool Scrambled = false;
+    public float ScrambleTimer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        arrow.SetActive(false);
         triggerAction.action.Enable();
         triggerAction.action.performed += LeftThrust;
     }
@@ -30,6 +36,15 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (ScrambleTimer > 0)
+        {
+            ScrambleTimer -= Time.deltaTime;
+            if (ScrambleTimer <= 0)
+            {
+                Scrambled = false;
+            }
+        }
+
         if (rocketsEquipped)
         {
             if (!leftRocket.rocket.activeSelf)
@@ -41,6 +56,8 @@ public class Player : MonoBehaviour
             {
                 rightRocket.rocket.SetActive(true);
             }
+
+            arrow.SetActive(true);
         }
 
         if (!rocketsEquipped)
@@ -93,6 +110,12 @@ public class Player : MonoBehaviour
         rb.useGravity = true;
     }
 
+    public void Scramble()
+    {
+        ScrambleTimer = 5.0f;
+        Scrambled = true;
+    }
+
     public void MoveThrust()
     {
         Vector3 leftDirection = leftRocket.hand.transform.forward;
@@ -105,7 +128,15 @@ public class Player : MonoBehaviour
         //characterController.SimpleMove(combined * speed);
         Debug.Log(combined);
         combined = new Vector3(combined.x, combined.y, combined.z);
-        transform.Translate(combined * speed, Space.World);
+
+        //combined = transform.localToWorldMatrix * combined;
+        if (Scrambled)
+        {
+            combined = -combined;
+        }
+
+        characterController.Move(combined * speed);
+        //transform.Translate(combined * speed, Space.World);
     }
 }
 

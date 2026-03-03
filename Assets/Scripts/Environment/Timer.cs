@@ -8,6 +8,8 @@ public class Timer : MonoBehaviour
     public TextMeshProUGUI ClockText;
 
     bool countingDown = false;
+
+    public RocketPickup rp;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,6 +27,13 @@ public class Timer : MonoBehaviour
             int seconds = (int)(timeRemaining - (minutes * 60));
 
             ClockText.text = minutes + ":" + seconds;
+        }
+
+        if(timeRemaining < 0)
+        {
+            rp.FailChallenge();
+            StopTimer();
+            ResetTimer();
         }
     }
 

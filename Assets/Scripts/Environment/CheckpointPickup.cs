@@ -26,7 +26,25 @@ public class CheckpointPickup : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         if (nextPoint != null)
-            nextPoint.SetActive(true);
+        {
+            if (nextPoint.GetComponent<RocketPickup>() != null)
+            {
+                nextPoint.GetComponent<RocketPickup>().SetCheckpointTrue(gameObject);
+            }
+            else
+            {
+                nextPoint.SetActive(true);
+            }
+
+        }
+
+        if (transform.parent != null)
+        {
+            if (transform.parent.GetComponent<AudioSource>() != null)
+            {
+                transform.parent.GetComponent<AudioSource>().Play();
+            }
+        }
 
         gameObject.SetActive(false);
     }

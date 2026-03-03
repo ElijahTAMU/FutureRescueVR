@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class RocketPickup : MonoBehaviour
@@ -5,6 +6,9 @@ public class RocketPickup : MonoBehaviour
 
     public GameObject[] firstCheckpoints;
     public Timer NavigationTimer;
+    public CheckpointCompletion[] finalCheckpoints;
+
+    public Confetti[] ConfettiCannons;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -33,7 +37,61 @@ public class RocketPickup : MonoBehaviour
             if (CheckpointNavigationManager.Instance != null)
                 CheckpointNavigationManager.Instance.RefreshTarget();
 
+            foreach (CheckpointCompletion g in finalCheckpoints)
+            {
+                g.complete = false;
+            }
+
             NavigationTimer.StartTimer();
         }
     }
+
+    public void SetCheckpointTrue(GameObject checkpoint)
+    {
+        foreach(CheckpointCompletion g in finalCheckpoints)
+        {
+            if(g.checkpoint == checkpoint)
+            {
+                g.complete = true;
+            }
+        }
+
+        bool allTrue = true;
+        for (int i = 0; i < finalCheckpoints.Length; i++)
+        {
+            allTrue = allTrue && finalCheckpoints[i].complete;
+        }
+
+        if (allTrue)
+        {
+            foreach(Confetti c in ConfettiCannons)
+            {
+                c.Fire();
+            }
+
+            NavigationTimer.StopTimer();    
+        }
+    }
+
+    public void FailChallenge()
+    {
+        GetComponent<AudioSource>().Play();
+
+        foreach (CheckpointCompletion g in finalCheckpoints)
+        {
+            g.complete = false;
+        }
+
+        foreach (GameObject g in GameObject.FindGameObjectsWithTag("Checkpoint"))
+        {
+            g.SetActive(false);
+        }
+    }
+}
+
+[Serializable]
+public class CheckpointCompletion
+{
+    public GameObject checkpoint;
+    public bool complete = false;
 }
