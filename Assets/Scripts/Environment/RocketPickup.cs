@@ -24,11 +24,14 @@ public class RocketPickup : MonoBehaviour
         {
             Player p = other.gameObject.GetComponent<Player>();
             p.rocketsEquipped = true;
-            //if (firstCheckpoint != null)
+
             foreach(GameObject g in firstCheckpoints)
             {
                 g.SetActive(true);
             }
+
+            if (CheckpointNavigationManager.Instance != null)
+                CheckpointNavigationManager.Instance.RefreshTarget();
 
             NavigationTimer.StartTimer();
         }

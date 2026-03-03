@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
 
     public Rigidbody rb;
 
-    public float speed = 0.05f;
+    public float speed = 0.01f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
