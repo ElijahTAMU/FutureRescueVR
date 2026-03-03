@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR;
 
 public class GuidanceArrowAndHaptics : MonoBehaviour
 {
@@ -12,30 +12,33 @@ public class GuidanceArrowAndHaptics : MonoBehaviour
     public Vector3 LocalOffset = new(0f, -0.15f, 0f);
     public float RotationSmoothing = 12f;
 
-    [Header("Haptics References")]
-    public XRBaseController LeftController;
-    public XRBaseController RightController;
-    public Transform LeftHand;
-    public Transform RightHand;
+    [Header("Aim Transforms (what 'forward' means)")]
+    public Transform LeftHandAim;
+    public Transform RightHandAim;
 
     [Header("Haptics Behavior")]
     [Tooltip("No vibration if angle is greater than this (degrees).")]
     public float CutoffAngle = 90f;
 
-    public float MinAmplitude = 0.05f;
-    public float MaxAmplitude = 0.35f;
+    [Range(0f, 1f)] public float MinAmplitude = 0.05f;
+    [Range(0f, 1f)] public float MaxAmplitude = 0.35f;
 
     [Tooltip("Length of each haptic pulse (seconds).")]
     public float PulseDuration = 0.05f;
 
-    [Tooltip("How often pulses are sent. Higher = smoother but more spam.")]
+    [Tooltip("How often pulses are sent.")]
     public float PulseRateHz = 20f;
+
+    [Tooltip("Haptic channel (usually 0).")]
+    public uint HapticChannel = 0;
 
     [Header("Optional gating")]
     public bool OnlyWhenRocketsEquipped = true;
     public Player Player;
 
-    float _nextPulseTime;
+    private float _nextPulseTime;
+    private InputDevice _leftDevice;
+    private InputDevice _rightDevice;
 
     void Reset()
     {
@@ -53,7 +56,7 @@ public class GuidanceArrowAndHaptics : MonoBehaviour
 
         Transform target = NavigationManager != null ? NavigationManager.CurrentTarget : null;
 
-        // Keep arrow in front of headset (3D "HUD")
+        // Keep arrow in front of headset
         transform.position = CameraTransform.position
                            + CameraTransform.forward * DistanceFromCamera
                            + CameraTransform.TransformVector(LocalOffset);
@@ -73,7 +76,7 @@ public class GuidanceArrowAndHaptics : MonoBehaviour
             );
         }
 
-        // Rate-limit haptic pulses
+        // Rate-limit pulses
         if (Time.time < _nextPulseTime)
             return;
 
@@ -82,26 +85,34 @@ public class GuidanceArrowAndHaptics : MonoBehaviour
         if (OnlyWhenRocketsEquipped && Player != null && !Player.rocketsEquipped)
             return;
 
-        SendHandHaptics(LeftController, LeftHand, target);
-        SendHandHaptics(RightController, RightHand, target);
+        // Acquire devices if needed
+        if (!_leftDevice.isValid) _leftDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+        if (!_rightDevice.isValid) _rightDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+        SendHandHaptics(_leftDevice, LeftHandAim, target);
+        SendHandHaptics(_rightDevice, RightHandAim, target);
     }
 
-    void SendHandHaptics(XRBaseController controller, Transform hand, Transform target)
+    void SendHandHaptics(InputDevice device, Transform aim, Transform target)
     {
-        if (controller == null || hand == null || target == null)
+        if (!device.isValid || aim == null || target == null)
             return;
 
-        Vector3 toTarget = (target.position - hand.position).normalized;
-        float angle = Vector3.Angle(hand.forward, toTarget);
+        if (!device.TryGetHapticCapabilities(out var caps) || !caps.supportsImpulse)
+            return;
 
-        // > 90° away: no vibration
+        Vector3 toTarget = (target.position - aim.position).normalized;
+        float angle = Vector3.Angle(aim.forward, toTarget);
+
+        // > 90° away => nothing
         if (angle > CutoffAngle)
             return;
 
-        // 0..90 lerp: closer to 0° => stronger
-        float t = Mathf.InverseLerp(CutoffAngle, 0f, angle); // 0 at cutoff, 1 at perfect
+        // 0..90 => lerp amplitude (closer = stronger)
+        float t = Mathf.InverseLerp(CutoffAngle, 0f, angle);
         float amp = Mathf.Lerp(MinAmplitude, MaxAmplitude, t);
+        amp = Mathf.Clamp01(amp);
 
-        controller.SendHapticImpulse(amp, PulseDuration);
+        device.SendHapticImpulse(HapticChannel, amp, PulseDuration);
     }
 }
