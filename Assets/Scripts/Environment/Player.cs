@@ -87,14 +87,14 @@ public class Player : MonoBehaviour
         {
             if (!leftRocket.isThrust)
             {
-                rb.useGravity = false;
+                //rb.useGravity = false;
                 gravityProvider.useGravity = false;
                 Debug.Log("Left Rocket On");
                 leftRocket.isThrust = true;
             }
             else
             {
-                rb.useGravity = true;
+                //rb.useGravity = true;
                 gravityProvider.useGravity = true;
                 Debug.Log("Left Rocket OFF");
                 leftRocket.isThrust = false;
@@ -107,7 +107,7 @@ public class Player : MonoBehaviour
     {
         rocketsEquipped = false;
         gravityProvider.useGravity = true;
-        rb.useGravity = true;
+        //rb.useGravity = true;
     }
 
     public void Scramble()

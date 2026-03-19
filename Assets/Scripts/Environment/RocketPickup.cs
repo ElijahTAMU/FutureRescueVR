@@ -29,10 +29,7 @@ public class RocketPickup : MonoBehaviour
             Player p = other.gameObject.GetComponent<Player>();
             p.rocketsEquipped = true;
 
-            foreach(GameObject g in firstCheckpoints)
-            {
-                g.SetActive(true);
-            }
+
 
             if (CheckpointNavigationManager.Instance != null)
                 CheckpointNavigationManager.Instance.RefreshTarget();
@@ -42,7 +39,26 @@ public class RocketPickup : MonoBehaviour
                 g.complete = false;
             }
 
+            GameObject[] checkPoints = GameObject.FindGameObjectsWithTag("Checkpoint");
+            foreach(GameObject g in checkPoints)
+            {
+                g.SetActive(false);
+            }
+
+            GameObject[] scramblers = GameObject.FindGameObjectsWithTag("Scrambler");
+            foreach(GameObject g in scramblers)
+            {
+                g.SetActive(true);
+            }
+          
+
+            foreach(GameObject g in firstCheckpoints)
+            {
+                g.SetActive(true);
+            }
             NavigationTimer.StartTimer();
+
+
         }
     }
 
