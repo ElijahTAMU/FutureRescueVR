@@ -26,8 +26,11 @@ public class SlidePuzzle : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             grid[0][i] = new CellInfo();
+            grid[0][i].Cell = new GameObject();
             grid[1][i] = new CellInfo();
+            grid[1][i].Cell = new GameObject();
             grid[2][i] = new CellInfo();
+            grid[2][i].Cell = new GameObject();
         }
 
         for (int i = 0; i < SmallCells.Length; i++)
@@ -85,13 +88,17 @@ public class SlidePuzzle : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void LateUpdate()
     {
         int r = Random.Range(0, BigCells.Length);
-        MoveBigCellToMatch(SmallCells[r]);
+        foreach (var cell in SmallCells)
+        {
+            MoveBigCellToMatch(cell);
+        }
+        //MoveBigCellToMatch(SmallCells[r]);
 
-        SetCellLocks();
-        RepositionSmallCells();
+        //SetCellLocks();
+        //RepositionSmallCells();
 
         row1 = grid[0];
         row2 = grid[1];
@@ -113,72 +120,72 @@ public class SlidePuzzle : MonoBehaviour
         }
     }
 
-    public void SetCellLocks()
-    {
-        foreach (CellInfo[] cellRow in grid)
-        {
-            foreach (CellInfo cell in cellRow)
-            {
-                cell.Locked = true;
-            }
-        }
+    //public void SetCellLocks()
+    //{
+    //    foreach (CellInfo[] cellRow in grid)
+    //    {
+    //        foreach (CellInfo cell in cellRow)
+    //        {
+    //            cell.Locked = true;
+    //        }
+    //    }
 
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if (grid[i][j].hasCell == false)
-                {
-                    int left = j - 1;
-                    int right = j + 1;
-                    int up = i - 1;
-                    int down = i + 1;
+    //    for (int i = 0; i < 3; i++)
+    //    {
+    //        for (int j = 0; j < 3; j++)
+    //        {
+    //            if (grid[i][j].hasCell == false)
+    //            {
+    //                int left = j - 1;
+    //                int right = j + 1;
+    //                int up = i - 1;
+    //                int down = i + 1;
 
-                    if (left >= 0)
-                    {
-                        CellInfo cell = grid[left][j];
-                        cell.Locked = false;
-                        cell.minZ_X = cell.anchorZ;
-                        cell.maxZ_X = cell.anchorZ;
-                        cell.minX_Y = cell.anchorX - 0.3f;
-                        cell.maxX_Y = cell.anchorX;
+    //                if (left >= 0)
+    //                {
+    //                    CellInfo cell = grid[left][j];
+    //                    cell.Locked = false;
+    //                    cell.minZ_X = cell.anchorZ;
+    //                    cell.maxZ_X = cell.anchorZ;
+    //                    cell.minX_Y = cell.anchorX - 0.3f;
+    //                    cell.maxX_Y = cell.anchorX;
 
-                    }
+    //                }
 
-                    if (right <= 2)
-                    {
-                        CellInfo cell = grid[right][j];
-                        cell.Locked = false;
-                        cell.minZ_X = cell.anchorZ;
-                        cell.maxZ_X = cell.anchorZ;
-                        cell.minX_Y = cell.anchorX;
-                        cell.maxX_Y = cell.anchorX + 0.3f;
-                    }
+    //                if (right <= 2)
+    //                {
+    //                    CellInfo cell = grid[right][j];
+    //                    cell.Locked = false;
+    //                    cell.minZ_X = cell.anchorZ;
+    //                    cell.maxZ_X = cell.anchorZ;
+    //                    cell.minX_Y = cell.anchorX;
+    //                    cell.maxX_Y = cell.anchorX + 0.3f;
+    //                }
 
-                    if (up >= 0)
-                    {
-                        CellInfo cell = grid[i][up];
-                        cell.Locked = false;
-                        cell.minZ_X = cell.anchorZ - 0.3f;
-                        cell.maxZ_X = cell.anchorZ;
-                        cell.minX_Y = cell.anchorX;
-                        cell.maxX_Y = cell.anchorX;
-                    }
+    //                if (up >= 0)
+    //                {
+    //                    CellInfo cell = grid[i][up];
+    //                    cell.Locked = false;
+    //                    cell.minZ_X = cell.anchorZ - 0.3f;
+    //                    cell.maxZ_X = cell.anchorZ;
+    //                    cell.minX_Y = cell.anchorX;
+    //                    cell.maxX_Y = cell.anchorX;
+    //                }
 
-                    if (down <= 2)
-                    {
-                        CellInfo cell = grid[i][down];
-                        cell.Locked = false;
-                        cell.minZ_X = cell.anchorZ;
-                        cell.maxZ_X = cell.anchorZ + 0.3f;
-                        cell.minX_Y = cell.anchorX;
-                        cell.maxX_Y = cell.anchorX;
-                    }
-                }
+    //                if (down <= 2)
+    //                {
+    //                    CellInfo cell = grid[i][down];
+    //                    cell.Locked = false;
+    //                    cell.minZ_X = cell.anchorZ;
+    //                    cell.maxZ_X = cell.anchorZ + 0.3f;
+    //                    cell.minX_Y = cell.anchorX;
+    //                    cell.maxX_Y = cell.anchorX;
+    //                }
+    //            }
 
-            }
-        }
-    }
+    //        }
+    //    }
+    //}
 
     public void RepositionSmallCells()
     {
@@ -190,17 +197,26 @@ public class SlidePuzzle : MonoBehaviour
                 {
                     CellInfo cell = grid[i][j];
                     Vector3 pos = cell.Cell.gameObject.transform.localPosition;
-                    cell.Cell.transform.localPosition = new Vector3(Mathf.Clamp(pos.x, cell.minX_Y, cell.maxX_Y), 0, Mathf.Clamp(pos.z, cell.minZ_X, cell.maxZ_X));
+                    cell.Cell.transform.localPosition = new Vector3(Mathf.Clamp(pos.x, cell.minX_Y, cell.maxX_Y), 0.5f, Mathf.Clamp(pos.z, cell.minZ_X, cell.maxZ_X));
+
+                    cell.Cell.transform.localRotation = Quaternion.identity;
+
+                    
                 }
             }
         }
     } 
+
+    public void CellReleased()
+    {
+        Debug.Log("Cell Released");
+    }
 }
 
 [Serializable]
 public class CellInfo
 {
-    public GameObject Cell = new GameObject();
+    public GameObject Cell;
     public bool hasCell = true;
     public bool Locked;
 
