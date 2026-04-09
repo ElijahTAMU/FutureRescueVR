@@ -32,6 +32,8 @@ TagManager:
   - SamplesInfoPanel
   - QDSUIToggleCheckboxRadio
   - SlidePuzzle
+  - NPC
+  - NPCHandler
   layers:
   - Default
   - TransparentFX

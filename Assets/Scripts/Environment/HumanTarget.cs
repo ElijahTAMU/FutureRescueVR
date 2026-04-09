@@ -2,15 +2,30 @@ using UnityEngine;
 
 public class HumanTarget : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    public bool isFinalHuman;
+    public Confetti[] Confettis;
+
+    private void OnTriggerEnter(Collider other)
     {
-        
+        if (other.gameObject.tag == "Player")
+        {
+            if (isFinalHuman)
+            {
+                gameObject.SetActive(false);
+                foreach (Confetti c in Confettis)
+                {
+
+                    c.Fire();
+                }
+            }
+            else
+            {
+                gameObject.SetActive(false);
+                HumanController hc = GameObject.FindGameObjectWithTag("NPCHandler").GetComponent<HumanController>();
+                GameObject.Find("Scanner").GetComponent<Scanner>().timer = 60;
+                hc.SpawnNewHuman();
+            }
+        }
     }
 }
